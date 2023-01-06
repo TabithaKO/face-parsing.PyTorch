@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- encoding: utf-8 -*-
 
-from .logger import setup_logger
-from .model import BiSeNet
+from logger import setup_logger
+from model import BiSeNet
 
 import torch
 
@@ -48,16 +48,16 @@ def vis_parsing_maps(im, parsing_anno, stride, save_im=False, save_path='vis_res
 
     # return vis_im
 
-def evaluate(respth='./res/test_res', dspth='./data', cp='model_final_diss.pth'):
+def evaluate(respth='./res/test-res', dspth='res/test-res/', cp='model_final_diss.pth'):
 
     if not os.path.exists(respth):
         os.makedirs(respth)
 
     n_classes = 19
     net = BiSeNet(n_classes=n_classes)
-    net.cuda()
+    # net.cuda()
     save_pth = osp.join('res/cp', cp)
-    net.load_state_dict(torch.load(save_pth))
+    net.load_state_dict(torch.load(save_pth, map_location=torch.device('cpu')))
     net.eval()
 
     to_tensor = transforms.Compose([
@@ -66,25 +66,23 @@ def evaluate(respth='./res/test_res', dspth='./data', cp='model_final_diss.pth')
     ])
     with torch.no_grad():
         for image_path in os.listdir(dspth):
-            img = Image.open(osp.join(dspth, image_path))
-            image = img.resize((512, 512), Image.BILINEAR)
-            img = to_tensor(image)
-            img = torch.unsqueeze(img, 0)
-            img = img.cuda()
-            out = net(img)[0]
-            parsing = out.squeeze(0).cpu().numpy().argmax(0)
-            # print(parsing)
-            print(np.unique(parsing))
+            if image_path != ".ipynb_checkpoints":
+                img = Image.open(osp.join(dspth, image_path))
+                image = img.resize((256, 256), Image.BILINEAR)
+                img = to_tensor(image)
+                img = torch.unsqueeze(img, 0)
+                # img = img.cuda()
+                out = net(img)[0]
+                parsing = out.squeeze(0).cpu().numpy().argmax(0)
+                par = np.asarray(parsing)
+                np.savetxt("res/test-res/parts.csv",par,delimiter=",")
+                # print("parsing shape:",parsing.shape)
+                # print(np.unique(parsing))
 
-            vis_parsing_maps(image, parsing, stride=1, save_im=True, save_path=osp.join(respth, image_path))
-
-
-
-
-
+                vis_parsing_maps(image, parsing, stride=1, save_im=True, save_path=osp.join(respth, image_path))
 
 
 if __name__ == "__main__":
-    evaluate(dspth='/home/zll/data/CelebAMask-HQ/test-img', cp='79999_iter.pth')
+    evaluate(dspth='holder/', cp='79999_iter.pth')
 
 
