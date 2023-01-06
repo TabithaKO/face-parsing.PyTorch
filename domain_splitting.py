@@ -119,9 +119,7 @@ def main(bucket_name, S3_ID, S3_Key, input_dir, output_dir_domain_1, output_dir_
     )
 
     def image_from_s3(key):
-        # change 'celeba-stargan' to your own bucket name
-        bucket = bucket_name
-        bucket = s3.Bucket(bucket)
+        bucket = s3.Bucket(bucket_name)
         image = bucket.Object(key)
         img_data = image.get().get("Body").read()
         return Image.open(io.BytesIO(img_data))
@@ -136,7 +134,6 @@ def main(bucket_name, S3_ID, S3_Key, input_dir, output_dir_domain_1, output_dir_
         else:
             return this_img_avg
 
-    # change 'celeba-stargan' to your own bucket name
     filenames = []
     if bucket_name == "No Bucket":
         files = os.listdir(input_dir)
