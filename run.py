@@ -107,8 +107,8 @@ def main():
     height = 256
     dim = (width, height)
 
-    AWS_ACCESS_KEY_ID = "AKIASNAWQ26EY5XZONWX"
-    AWS_SECRET_ACCESS_KEY = "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"
+    AWS_ACCESS_KEY_ID = ""
+    AWS_SECRET_ACCESS_KEY = ""
 
     s3 = boto3.resource(
         "s3",
